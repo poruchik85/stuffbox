@@ -1,0 +1,2 @@
+folderTemplate="__project_id__-__task_id_____task_description__"
+commitTemplate="__task_type__ __project_id__-__task_id__ __task_description__"

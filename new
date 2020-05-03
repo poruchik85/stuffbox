@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+DIR=$(readlink -e $(dirname $0))
+
+cfg="$DIR/cfg/cfg"
+taskCfg="$DIR/cfg/task_cfg"
+declare -a fieldHeaders
+declare -a fieldTemplates
+declare -a fieldDefaults
+declare -a existedParams
+
+if [[ ! -f $cfg || ! -f $taskCfg ]]
+then
+echo "Config file not exists" >&2
+exit
+fi
+
+. $cfg
+
+for param in "$@"
+do
+  existedParams+=($param)
+done
+
+IFS=$'\n'
+i=0
+for line in $(cat $taskCfg)
+do
+  IFS="|"
+  j=0
+  for field in $line
+  do
+    case $j in
+    0)
+      fieldHeaders[i]=$field
+      ;;
+    1)
+      fieldTemplates[i]=$field
+      ;;
+    2)
+      fieldDefaults[i]=$field
+      ;;
+    esac
+    j=$((j+1))
+  done
+  i=$((i+1))
+done
+
+for ((c=0;c<i;c++))
+do
+
+  if [ -n "${fieldDefaults[c]}" ]
+  then
+    echo -n ${fieldHeaders[c]//:/ (${fieldDefaults[c]}):}
+  else
+    echo -n "${fieldHeaders[c]}"
+  fi
+  tpl="${fieldTemplates[c]}"
+  if [ -n "${existedParams[c]}" ]
+  then
+    echo "${existedParams[c]}"
+    val="${existedParams[c]}"
+  else
+    read val
+  fi
+
+  if [[ -z "${val}" && -n "${fieldDefaults[c]}" ]]
+  then
+    val="${fieldDefaults[c]}"
+  elif [[ -z "${val}" && -z "${fieldDefaults[c]}" ]]
+  then
+      c=$((c-1))
+      continue
+  fi
+
+  commitTemplate=${commitTemplate//$tpl/$val}
+  val=${val//" "/"_"}
+  folderTemplate=${folderTemplate//$tpl/$val}
+done
+
+cp -r $DIR/template $DIR/$folderTemplate
+sed -i "1s/^/$commitTemplate\n/" $DIR/$folderTemplate/1_stuff.txt
