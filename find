@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+DIR=$(readlink -e "$(dirname "$0")")
+
+if [ -z "$1" ]
+then
+  echo "Search string not specified"; exit;
+fi
+
+declare -a resultSet
+nameSearch=${1//" "/"_"}
+
+for result in $(find $DIR/archive -maxdepth 2 -iname "*$nameSearch*")
+do
+  resultSet+=(${result##*/})
+done
+
+for result in $(grep -lr "$1" $DIR/archive)
+do
+  existed=0
+  result=${result#*$DIR/archive/*/}
+  result=${result%/*}
+  for existedResult in "${resultSet[@]}"
+  do
+    if [ "$result" = "$existedResult" ]
+    then
+      existed=1
+    fi
+  done
+
+  if [ $existed -eq 0 ]
+  then
+    resultSet+=($result)
+  fi
+done
+
+for result in "${resultSet[@]}"
+do
+  echo "$result"
+done
