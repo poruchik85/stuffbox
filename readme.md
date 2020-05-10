@@ -15,3 +15,7 @@ For individual tasks, I made a standard template, presented as the `template` fo
 * `7_rest.http` - used for API requests. IDEs by jetbrains allow you to write REST requests, with headers, parameters, etc. In most cases, this is more convenient than postman, because you do not need to switch to another program during the development process. API development can take place completely in IDE, without switching to postman or browser;
 
 When starting a new task, I simply copy this folder to a new one, with the task number and a brief description, which in the future will become a description of the commit. After the task completed, it is transferred to the archive folder.
+
+I wrote some simple bash scripts to automate this process:
+
+* `./new` - asks for some task parameters (i.e. project, task ID, description, etc.), and does two things: creates new folder for task artifacts and generates message for future commit (this message inputs into `1_stuff.txt` file); 
