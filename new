@@ -90,4 +90,9 @@ sed -i "1s/^/$commitTemplate\n/" $DIR/$folderTemplate/1_stuff.txt
 
 logMessage="$(date +"%F %T") root"
 
-sed -i "1s/^/$logMessage\n/" $DIR/$folderTemplate/move.log
+if ! [ -f "$DIR/$folderTemplate/move.log" ]; then
+  touch "$DIR/$folderTemplate/move.log"
+  echo "$logMessage" >> $DIR/$folderTemplate/move.log
+  else
+  sed -i "1s/^/$logMessage\n/" $DIR/$folderTemplate/move.log
+fi

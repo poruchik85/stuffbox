@@ -67,4 +67,9 @@ mv "$selectedTask" "$targetPath/$selectedTaskName"
 
 logMessage="$(date +"%F %T") $targetLog"
 
-sed -i "1s/^/$logMessage\n/" $targetPath/$selectedTaskName/move.log
+if ! [ -f "$targetPath/$selectedTaskName/move.log" ]; then
+  touch "$targetPath/$selectedTaskName/move.log"
+  echo "$logMessage" >> $targetPath/$selectedTaskName/move.log
+  else
+    sed -i "1s/^/$logMessage\n/" $targetPath/$selectedTaskName/move.log
+fi
