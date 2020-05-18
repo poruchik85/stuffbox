@@ -11,8 +11,9 @@ case "$1" in
 -r) targetPath="$DIR"; targetLog="root";;
 -p) targetPath="$DIR/archive/pause"; targetLog="pause";;
 -t) targetPath="$DIR/archive/test"; targetLog="test";;
--a) targetPath="$DIR/archive/$(date +"%Y.%m")"; targetLog="archive $(date +"%Y.%m")";;
-*) echo "Wrong key $1. Available keys: -r(oot) -p(ause) -t(est) -a(rchive)"; exit;;
+-a) targetPath="$DIR/archive/$(date +"%Y.%m")"; targetLog="$(date +"%Y.%m")";;
+-b) ;;
+*) echo "Wrong key $1. Available keys: -r(oot) -p(ause) -t(est) -a(rchive) -b(ack)"; exit;;
 esac
 
 taskPathsCount=$(find ./1_stuff/ -type d -name "$2*" | wc -l)
@@ -54,6 +55,30 @@ else
   selectedTaskPath=${tasks%/*}
 fi
 
+if [ "$1" = "-b" ]; then
+  if ! [ -f "$selectedTask/move.log" ]; then
+    echo "Task has no previous place"
+    exit
+  fi
+
+  previousPlaceLog=$(sed -n 2p $selectedTask/move.log)
+
+  if [ -z "$previousPlaceLog" ]; then
+    echo "Task has no previous place"
+    exit
+  fi
+
+  previousPlace=${previousPlaceLog:20}
+
+  if [ "$previousPlace" = "root" ]; then
+    targetPath="$DIR"
+    targetLog="root"
+  else
+    targetPath="$DIR/archive/$previousPlace"
+    targetLog="$previousPlace"
+  fi
+fi
+
 if [ "$targetPath" = "$selectedTaskPath" ]; then
   echo "Task already in place"
   exit
@@ -68,8 +93,8 @@ mv "$selectedTask" "$targetPath/$selectedTaskName"
 logMessage="$(date +"%F %T") $targetLog"
 
 if ! [ -f "$targetPath/$selectedTaskName/move.log" ]; then
-  touch "$targetPath/$selectedTaskName/move.log"
-  echo "$logMessage" >> $targetPath/$selectedTaskName/move.log
+    touch "$targetPath/$selectedTaskName/move.log"
+    echo "$logMessage" >> $targetPath/$selectedTaskName/move.log
   else
     sed -i "1s/^/$logMessage\n/" $targetPath/$selectedTaskName/move.log
 fi
